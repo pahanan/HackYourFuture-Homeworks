@@ -62,6 +62,7 @@ const searchButton = document.querySelector(`#search-button`);
 searchButton.addEventListener("click", findRecipeByWord);
 
 renderRecipes(recipes);
+startCustomTimer();
 
 function renderRecipes(recipes) {
   const recipeForm = document.querySelector(`#recipes-container`);
@@ -104,8 +105,13 @@ function renderRecipes(recipes) {
   });
 }
 
+let isFormExist = false;
 function createRecipeForm() {
-  addNewButton.style.display = "none";
+  if(isFormExist){
+    isFormExist=false;
+    return;
+  }
+  isFormExist = true;
   const recipeForm = document.querySelector(`#recipes-container`);
   const newForm = document.createElement("div");
 
@@ -252,6 +258,9 @@ function createSubmitButton(newForm, ingredientsContainer) {
 }
 
 function findRecipeByWord(){
+  if(isFormExist){
+    isFormExist=false;
+  }
   const wordForSearchInput = document.querySelector(`#word-for-search`).value.trim().toLowerCase();
   const arrayRecipesWithWord = recipes.filter((recipe) =>
     recipe.title.toLowerCase().includes(wordForSearchInput)
@@ -262,6 +271,9 @@ function findRecipeByWord(){
 
 let flag = true;
 function sortByAmountIngredients(){
+  if(isFormExist){
+    isFormExist=false;
+  }
   if(flag){
     recipes.sort((a, b) => b.ingredients.length - a.ingredients.length);
     flag = false;
@@ -273,5 +285,90 @@ function sortByAmountIngredients(){
 
   renderRecipes(recipes);
 }
+
+function startPageTimer() {
+  const timerElement = document.querySelector("#page-timer");
+  if (!timerElement) {
+    console.error("Element with id '#page-timer' not found.");
+    return;
+  }
+
+  let seconds = 0;
+
+  function updateDisplay() {
+    const hours = Math.floor(seconds / 3600).toString().padStart(2, "0");
+    const minutes = Math.floor((seconds % 3600) / 60).toString().padStart(2, "0");
+    const secs = (seconds % 60).toString().padStart(2, "0");
+    timerElement.textContent = `${hours}:${minutes}:${secs}`;
+  }
+
+  setInterval(() => {
+    seconds++;
+    updateDisplay();
+  }, 1000);
+
+  updateDisplay(); 
+}
+
+startPageTimer();
+
+document.querySelector("#start-timer").addEventListener("click", startCustomTimer);
+
+let isTimerRunning = false;
+let timerInterval = null;
+
+function startCustomTimer() {
+  const timerInput = document.querySelector("#timer-input").value.trim();
+  const timerDisplay = document.querySelector("#timer-display");
+  const timeSound = document.querySelector("#alarm-sound");
+  const finishSound = document.querySelector("#finish-sound");
+  const startButton = document.querySelector("#start-timer");
+
+  const minutes = parseInt(timerInput, 10);
+
+  if (isNaN(minutes) || minutes <= 0) {
+    alert("Please enter a valid time in minutes (greater than 0)");
+    return;
+  }
+  
+  let totalSeconds = minutes * 60;
+
+  function updateDisplay() {
+    const hours = Math.floor(totalSeconds / 3600).toString().padStart(2, "0");
+    const mins = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, "0");
+    const secs = (totalSeconds % 60).toString().padStart(2, "0");
+    timerDisplay.textContent = `${hours}:${mins}:${secs}`;
+  }
+
+  function stopTimer(){
+    clearInterval(timerInterval);
+    timerDisplay.textContent = "00:00:00";
+    finishSound.play();
+    startButton.textContent="Start timer";
+    isTimerRunning= false;
+  }
+
+  if(isTimerRunning){
+    stopTimer();
+    return;
+  }
+
+  timerInterval = setInterval(() => {
+    totalSeconds--;
+    if (totalSeconds < 0) {
+      stopTimer();
+    } else {
+      isTimerRunning = true;
+      timeSound.play();
+      updateDisplay();
+    }
+  }, 1000);
+
+  isTimerRunning = true; 
+  startButton.textContent = "Stop Timer";
+  updateDisplay();
+  timerInput.textContent = 0;
+}
+
 
 

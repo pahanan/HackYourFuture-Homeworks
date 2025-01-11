@@ -24,10 +24,27 @@ button:hover {
 
 #functions-form {
   display: flex;
+  align-items: center;
   border: 1px solid black;
   padding: 10px 20px;
   gap: 20px;
 }
+
+#custom-timer-form, 
+#search-form, 
+#sort-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#page-timer-form {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+  margin-left: auto; 
+}
+
 
 #recipes-container {
   display: flex;
