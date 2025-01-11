@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="functions-form">
+        <div id="search-form">
+            <input type="text" id="word-for-search" placeholder="Search for a recipe" />
+            <button id="search-button">Search</button>
+        </div>
+    
+        <div id="sort-form">
+            <button id="sort-button">Sort by the amount of ingredients needed</button>
+        </div>
+
+        <button id="add-new-recipe">Add new recipe</button>
+
+        <div id="custom-timer-form">
+            <label for="timer-input">Set Timer (minutes):</label>
+            <input type="text" id="timer-input" placeholder="Enter minutes" />
+            <button id="start-timer">Start Timer</button>
+            <div id="timer-display">00:00:00</div>
+            <audio id="alarm-sound" src="./timer.mp3"></audio>
+            <audio id="finish-sound" src="./notification.mp3"></audio>
+        </div>
+        
+        <div id="page-timer-form">
+            <label>Time on page:</label>
+            <span id="page-timer">00:00:00</span>
+        </div>
+    </div>
+    
+    <div id="recipes-container"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
