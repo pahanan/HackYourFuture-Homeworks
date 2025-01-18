@@ -8,16 +8,16 @@ async function fetchRecipes() {
     const response = await fetch(API_URL);
 
     if (!response.ok) {
-      throw new Error(`HTTP ошибка! Статус: ${response.status}`);
+      throw new Error(`Error!${response.status}`);
     }
 
     recipes = await response.json();
-    console.log("Рецепты успешно загружены:", recipes);
+    console.log("Error!", recipes);
     await fetchIngredientPrices(); 
     enrichRecipesWithPrices(); 
     renderRecipes(recipes);
   } catch (error) {
-    console.error('Ошибка при загрузке данных рецептов:', error);
+    console.error('Error!', error);
   }
 }
 
@@ -26,13 +26,11 @@ async function fetchIngredientPrices() {
     const response = await fetch(INGREDIENTS_API_URL);
 
     if (!response.ok) {
-      throw new Error(`HTTP ошибка! Статус: ${response.status}`);
+      throw new Error(`Error!  ${response.status}`);
     }
 
     ingredientPrices = await response.json();
-    console.log("Цены ингредиентов успешно загружены:", ingredientPrices);
   } catch (error) {
-    console.error('Ошибка при загрузке цен ингредиентов:', error);
   }
 }
 
