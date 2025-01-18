@@ -1,103 +1,83 @@
-const recipes = [
-  {
-    id: 1,
-    title: "Glögg",
-    picture_url:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Gl%C3%B6gg_kastrull.JPG/800px-Gl%C3%B6gg_kastrull.JPG",
-    ingredients: [
-      { name: "Orange zest", amount: "0.5" },
-      { name: "Water", amount: "200 ml" },
-      { name: "Sugar", amount: "275 g" },
-      { name: "Whole cloves", amount: "5" },
-      { name: "Cinnamon sticks", amount: "2" },
-    ],
-    description: "Mix everything, heat it, and you are good to go!",
-  },
+const API_URL = 'https://raw.githubusercontent.com/pahanan/pahan_an.github.io/main/api/data.json';
+const INGREDIENTS_API_URL = 'https://raw.githubusercontent.com/pahanan/pahan_an.github.io/main/api/ingredient-prices.json';
+let recipes = [];
+let ingredientPrices = {};
 
-  {
-    id: 2,
-    title: "Crab salad",
-    picture_url:
-      "https://img.iamcook.ru/2020/upl/recipes/cat/u-0e39647715eef84fcd286a52c4db259b.JPG",
-    ingredients: [
-      { name: "crab meat", amount: "1 pound" },
-      { name: "2 ribs", amount: "celery" },
-      { name: "mayonnaise", amount: "1 tablespoon" },
-      { name: "lemon juice", amount: "5" },
-      { name: "kosher salt", amount: "1/4 teaspoon" },
-      { name: "finely diced shallot", amount: "2 tablespoons" },
-      { name: "roughly chopped fresh herbs", amount: "1 tablespoon" },
-    ],
-    description: "Crab salad is one of the best ways to enjoy crab meat. It’s super easy to make and a meal you’ll love for the summer season. All you need are crab meat (I’ve got options), crisp vegetables, fresh herbs, and a creamy lemon dressing that ties it all together.",
-  },
+async function fetchRecipes() {
+  try {
+    const response = await fetch(API_URL);
 
-  {
-    id: 3,
-    title: "Borscht Recipe",
-    picture_url:
-      "https://vikalinka.com/wp-content/uploads/2019/01/Borscht-10-Edit-320x320.jpg",
-    ingredients: [
-      { name: "cold water", amount: "3 litres" },
-      { name: "pork ribs or beef attached to a bone", amount: "600g" },
-      { name: "onion", amount: "1/2" },
-      { name: "carrot", amount: "1" },
-      { name: "celery sticks", amount: "2" },
-      { name: "bay leaves", amount: "2" },
-      { name: "peppercorns", amount: "2" },
-      { name: "salt", amount: "1 tsp" },    
-    ],
-    description: "Ukrainian borscht recipe. A rich meat based broth with beets, cabbage, potatoes and carrots served with a dollop of sour cream. ",
-  },
-];
+    if (!response.ok) {
+      throw new Error(`HTTP ошибка! Статус: ${response.status}`);
+    }
 
-const addNewButton = document.querySelector(`#add-new-recipe`);
-addNewButton.addEventListener(`click`, createRecipeForm);
+    recipes = await response.json();
+    console.log("Рецепты успешно загружены:", recipes);
+    await fetchIngredientPrices(); 
+    enrichRecipesWithPrices(); 
+    renderRecipes(recipes);
+  } catch (error) {
+    console.error('Ошибка при загрузке данных рецептов:', error);
+  }
+}
 
-const sortButton = document.querySelector(`#sort-button`);
-sortButton.addEventListener(`click`, sortByAmountIngredients);
+async function fetchIngredientPrices() {
+  try {
+    const response = await fetch(INGREDIENTS_API_URL);
 
-const wordForSearchInput = document.querySelector(`#word-for-search`);
-const searchButton = document.querySelector(`#search-button`);
+    if (!response.ok) {
+      throw new Error(`HTTP ошибка! Статус: ${response.status}`);
+    }
 
-searchButton.addEventListener("click", findRecipeByWord);
+    ingredientPrices = await response.json();
+    console.log("Цены ингредиентов успешно загружены:", ingredientPrices);
+  } catch (error) {
+    console.error('Ошибка при загрузке цен ингредиентов:', error);
+  }
+}
 
-renderRecipes(recipes);
-startCustomTimer();
+function enrichRecipesWithPrices() {
+  recipes.forEach((recipe) => {
+    recipe.ingredients.forEach((ingredient) => {
+      const price = ingredientPrices[ingredient.name] || 'N/A';
+      ingredient.price = price;
+    });
+  });
+}
 
 function renderRecipes(recipes) {
-  const recipeForm = document.querySelector(`#recipes-container`);
-  recipeForm.innerHTML = "";
+  const recipeForm = document.querySelector('#recipes-container');
+  recipeForm.innerHTML = '';
 
   recipes.forEach((recipe) => {
-    const newRecipeContainer = document.createElement("div");
+    const newRecipeContainer = document.createElement('div');
+    newRecipeContainer.classList.add('recipe-container');
 
-    const recipeTitle = document.createElement("h1");
+    const recipeTitle = document.createElement('h1');
     recipeTitle.textContent = recipe.title;
     newRecipeContainer.appendChild(recipeTitle);
 
-    const recipeImg = document.createElement("img");
+    const recipeImg = document.createElement('img');
     recipeImg.src = recipe.picture_url;
     recipeImg.alt = recipe.description;
     recipeImg.width = 400;
     newRecipeContainer.appendChild(recipeImg);
 
     if (recipe.ingredients && recipe.ingredients.length > 0) {
-      const ingredientTitle = document.createElement("p");
-      ingredientTitle.textContent = "Ingredients:";
+      const ingredientTitle = document.createElement('p');
+      ingredientTitle.textContent = 'Ingredients:';
       newRecipeContainer.appendChild(ingredientTitle);
-      const lineBreak = document.createElement("br");
-      newRecipeContainer.appendChild(lineBreak);
 
-      const recipeIngredients = document.createElement("ul");
+      const recipeIngredients = document.createElement('ul');
       recipe.ingredients.forEach((ingredient) => {
-        const listItem = document.createElement("li");
-        listItem.textContent = `${ingredient.name}: ${ingredient.amount}`;
+        const listItem = document.createElement('li');
+        listItem.textContent = `${ingredient.name}: ${ingredient.amount} (Price: ${ingredient.price} DKK)`;
         recipeIngredients.appendChild(listItem);
       });
       newRecipeContainer.appendChild(recipeIngredients);
     }
 
-    const recipeDescription = document.createElement("p");
+    const recipeDescription = document.createElement('p');
     recipeDescription.textContent = recipe.description;
     newRecipeContainer.appendChild(recipeDescription);
 
@@ -105,15 +85,34 @@ function renderRecipes(recipes) {
   });
 }
 
+function findRecipeByWord() {
+  const wordForSearchInput = document.querySelector('#word-for-search').value.trim().toLowerCase();
+  const filteredRecipes = recipes.filter((recipe) =>
+    recipe.title.toLowerCase().includes(wordForSearchInput)
+  );
+  renderRecipes(filteredRecipes);
+}
+
+let isSortedDescending = true;
+function sortByAmountIngredients() {
+  recipes.sort((a, b) =>
+    isSortedDescending
+      ? b.ingredients.length - a.ingredients.length
+      : a.ingredients.length - b.ingredients.length
+  );
+  isSortedDescending = !isSortedDescending;
+  renderRecipes(recipes);
+}
+
 let isFormExist = false;
 function createRecipeForm() {
-  if(isFormExist){
-    isFormExist=false;
+  if (isFormExist) {
+    isFormExist = false;
     return;
   }
   isFormExist = true;
-  const recipeForm = document.querySelector(`#recipes-container`);
-  const newForm = document.createElement("div");
+  const recipeForm = document.querySelector('#recipes-container');
+  const newForm = document.createElement('div');
 
   createFormTitle(newForm);
   addNameAndImage(newForm);
@@ -125,42 +124,42 @@ function createRecipeForm() {
 }
 
 function createFormTitle(newForm) {
-  const formTitle = document.createElement("h1");
-  formTitle.textContent = "New Recipe";
+  const formTitle = document.createElement('h1');
+  formTitle.textContent = 'New Recipe';
   newForm.appendChild(formTitle);
 }
 
 function addNameAndImage(newForm) {
-  const formName = document.createElement("label");
-  formName.textContent = "Add name of dish";
-  const nameInput = document.createElement("input");
-  nameInput.id = "recipe-title";
+  const formName = document.createElement('label');
+  formName.textContent = 'Add name of dish';
+  const nameInput = document.createElement('input');
+  nameInput.id = 'recipe-title';
   formName.appendChild(nameInput);
   newForm.appendChild(formName);
 
-  const formImg = document.createElement("label");
-  formImg.textContent = "Add image of dish";
-  const imgInput = document.createElement("input");
-  imgInput.id = "recipe-image";
+  const formImg = document.createElement('label');
+  formImg.textContent = 'Add image of dish';
+  const imgInput = document.createElement('input');
+  imgInput.id = 'recipe-image';
   formImg.appendChild(imgInput);
   newForm.appendChild(formImg);
 }
 
 function createIngredientsSection(newForm) {
-  const labelIngredients = document.createElement("label");
-  labelIngredients.textContent = "Ingredients (min 5):";
+  const labelIngredients = document.createElement('label');
+  labelIngredients.textContent = 'Ingredients (min 5):';
   newForm.appendChild(labelIngredients);
 
-  const ingredientsContainer = document.createElement("div");
-  ingredientsContainer.id = "ingredients-container";
+  const ingredientsContainer = document.createElement('div');
+  ingredientsContainer.id = 'ingredients-container';
   newForm.appendChild(ingredientsContainer);
 
-  const addIngredientButton = document.createElement("button");
-  addIngredientButton.type = "button";
-  addIngredientButton.textContent = "Add ingredient";
-  addIngredientButton.id = "ingredient-button";
+  const addIngredientButton = document.createElement('button');
+  addIngredientButton.type = 'button';
+  addIngredientButton.textContent = 'Add ingredient';
+  addIngredientButton.id = 'ingredient-button';
 
-  addIngredientButton.addEventListener(`click`, () => {
+  addIngredientButton.addEventListener('click', () => {
     createFormForIngredient(ingredientsContainer);
   });
 
@@ -174,16 +173,16 @@ function createIngredientsSection(newForm) {
 }
 
 function createFormForIngredient(ingredientsContainer) {
-  const ingredientInput = document.createElement("div");
-  ingredientInput.classList.add("ingredient");
+  const ingredientInput = document.createElement('div');
+  ingredientInput.classList.add('ingredient');
 
-  const nameInput = document.createElement("input");
-  nameInput.classList.add("ingredient-name");
-  nameInput.placeholder = "Ingredient name";
+  const nameInput = document.createElement('input');
+  nameInput.classList.add('ingredient-name');
+  nameInput.placeholder = 'Ingredient name';
 
-  const amountInput = document.createElement("input");
-  amountInput.classList.add("ingredient-amount");
-  amountInput.placeholder = "Amount";
+  const amountInput = document.createElement('input');
+  amountInput.classList.add('ingredient-amount');
+  amountInput.placeholder = 'Amount';
 
   ingredientInput.appendChild(nameInput);
   ingredientInput.appendChild(amountInput);
@@ -191,38 +190,38 @@ function createFormForIngredient(ingredientsContainer) {
 }
 
 function createDescriptionField(newForm) {
-  const formDescription = document.createElement("label");
-  formDescription.textContent = "Description:";
-  const descriptionInput = document.createElement("textarea");
-  descriptionInput.id = "recipe-description";
+  const formDescription = document.createElement('label');
+  formDescription.textContent = 'Description:';
+  const descriptionInput = document.createElement('textarea');
+  descriptionInput.id = 'recipe-description';
   formDescription.appendChild(descriptionInput);
   newForm.appendChild(formDescription);
 }
 
 function createSubmitButton(newForm, ingredientsContainer) {
-  const addRecipe = document.createElement("button");
-  addRecipe.textContent = "Add recipe";
-  addRecipe.id = "add-recipe-button";
-  addRecipe.type = "button";
+  const addRecipe = document.createElement('button');
+  addRecipe.textContent = 'Add recipe';
+  addRecipe.id = 'add-recipe-button';
+  addRecipe.type = 'button';
 
-  addRecipe.addEventListener(`click`, function (event) {
+  addRecipe.addEventListener('click', function (event) {
     event.preventDefault();
 
-    const title = document.querySelector("#recipe-title").value.trim();
-    const image = document.querySelector("#recipe-image").value.trim();
-    const description = document.querySelector("#recipe-description").value.trim();
+    const title = document.querySelector('#recipe-title').value.trim();
+    const image = document.querySelector('#recipe-image').value.trim();
+    const description = document.querySelector('#recipe-description').value.trim();
 
     if (!title || !image || !description) {
-      alert("Please fill in all required fields: title, image URL, and description.");
+      alert('Please fill in all required fields: title, image URL, and description.');
       return;
     }
 
     const ingredients = [];
     let hasEmptyIngredient = false;
 
-    ingredientsContainer.querySelectorAll(".ingredient").forEach((ingredientInput) => {
-      const name = ingredientInput.querySelector(".ingredient-name").value.trim();
-      const amount = ingredientInput.querySelector(".ingredient-amount").value.trim();
+    ingredientsContainer.querySelectorAll('.ingredient').forEach((ingredientInput) => {
+      const name = ingredientInput.querySelector('.ingredient-name').value.trim();
+      const amount = ingredientInput.querySelector('.ingredient-amount').value.trim();
       if (!name || !amount) {
         hasEmptyIngredient = true;
       } else {
@@ -231,12 +230,12 @@ function createSubmitButton(newForm, ingredientsContainer) {
     });
 
     if (hasEmptyIngredient) {
-      alert("Please fill in all ingredient fields.");
+      alert('Please fill in all ingredient fields.');
       return;
     }
 
     if (ingredients.length < 5) {
-      alert("Please add at least 5 ingredients!");
+      alert('Please add at least 5 ingredients!');
       return;
     }
 
@@ -249,45 +248,17 @@ function createSubmitButton(newForm, ingredientsContainer) {
     };
 
     recipes.push(newRecipe);
+    enrichRecipesWithPrices();
     renderRecipes(recipes);
-    newForm.innerHTML = "";
-    addNewButton.style.display = "block";
+    newForm.innerHTML = '';
+    addNewButton.style.display = 'block';
   });
 
   newForm.appendChild(addRecipe);
 }
 
-function findRecipeByWord(){
-  if(isFormExist){
-    isFormExist=false;
-  }
-  const wordForSearchInput = document.querySelector(`#word-for-search`).value.trim().toLowerCase();
-  const arrayRecipesWithWord = recipes.filter((recipe) =>
-    recipe.title.toLowerCase().includes(wordForSearchInput)
-  );
-
-  renderRecipes(arrayRecipesWithWord); 
-}
-
-let flag = true;
-function sortByAmountIngredients(){
-  if(isFormExist){
-    isFormExist=false;
-  }
-  if(flag){
-    recipes.sort((a, b) => b.ingredients.length - a.ingredients.length);
-    flag = false;
-
-  } else{
-    recipes.sort((a, b) => a.ingredients.length - b.ingredients.length);
-    flag = true;
-  }
-
-  renderRecipes(recipes);
-}
-
 function startPageTimer() {
-  const timerElement = document.querySelector("#page-timer");
+  const timerElement = document.querySelector('#page-timer');
   if (!timerElement) {
     console.error("Element with id '#page-timer' not found.");
     return;
@@ -296,9 +267,9 @@ function startPageTimer() {
   let seconds = 0;
 
   function updateDisplay() {
-    const hours = Math.floor(seconds / 3600).toString().padStart(2, "0");
-    const minutes = Math.floor((seconds % 3600) / 60).toString().padStart(2, "0");
-    const secs = (seconds % 60).toString().padStart(2, "0");
+    const hours = Math.floor(seconds / 3600).toString().padStart(2, '0');
+    const minutes = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+    const secs = (seconds % 60).toString().padStart(2, '0');
     timerElement.textContent = `${hours}:${minutes}:${secs}`;
   }
 
@@ -307,48 +278,48 @@ function startPageTimer() {
     updateDisplay();
   }, 1000);
 
-  updateDisplay(); 
+  updateDisplay();
 }
 
 startPageTimer();
 
-document.querySelector("#start-timer").addEventListener("click", startCustomTimer);
+document.querySelector('#start-timer').addEventListener('click', startCustomTimer);
 
 let isTimerRunning = false;
 let timerInterval = null;
 
 function startCustomTimer() {
-  const timerInput = document.querySelector("#timer-input").value.trim();
-  const timerDisplay = document.querySelector("#timer-display");
-  const timeSound = document.querySelector("#alarm-sound");
-  const finishSound = document.querySelector("#finish-sound");
-  const startButton = document.querySelector("#start-timer");
+  const timerInput = document.querySelector('#timer-input').value.trim();
+  const timerDisplay = document.querySelector('#timer-display');
+  const timeSound = document.querySelector('#alarm-sound');
+  const finishSound = document.querySelector('#finish-sound');
+  const startButton = document.querySelector('#start-timer');
 
   const minutes = parseInt(timerInput, 10);
 
   if (isNaN(minutes) || minutes <= 0) {
-    alert("Please enter a valid time in minutes (greater than 0)");
+    alert('Please enter a valid time in minutes (greater than 0)');
     return;
   }
-  
+
   let totalSeconds = minutes * 60;
 
   function updateDisplay() {
-    const hours = Math.floor(totalSeconds / 3600).toString().padStart(2, "0");
-    const mins = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, "0");
-    const secs = (totalSeconds % 60).toString().padStart(2, "0");
+    const hours = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
+    const mins = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
+    const secs = (totalSeconds % 60).toString().padStart(2, '0');
     timerDisplay.textContent = `${hours}:${mins}:${secs}`;
   }
 
-  function stopTimer(){
+  function stopTimer() {
     clearInterval(timerInterval);
-    timerDisplay.textContent = "00:00:00";
+    timerDisplay.textContent = '00:00:00';
     finishSound.play();
-    startButton.textContent="Start timer";
-    isTimerRunning= false;
+    startButton.textContent = 'Start timer';
+    isTimerRunning = false;
   }
 
-  if(isTimerRunning){
+  if (isTimerRunning) {
     stopTimer();
     return;
   }
@@ -364,11 +335,34 @@ function startCustomTimer() {
     }
   }, 1000);
 
-  isTimerRunning = true; 
-  startButton.textContent = "Stop Timer";
+  isTimerRunning = true;
+  startButton.textContent = 'Stop Timer';
   updateDisplay();
   timerInput.textContent = 0;
 }
 
+const addNewButton = document.querySelector('#add-new-recipe');
+const sortButton = document.querySelector('#sort-button');
+const searchButton = document.querySelector('#search-button');
 
+if (addNewButton) addNewButton.addEventListener('click', createRecipeForm);
+if (sortButton) sortButton.addEventListener('click', sortByAmountIngredients);
+if (searchButton) searchButton.addEventListener('click', findRecipeByWord);
+
+fetchRecipes();
+
+const ingredientSearchButton = document.querySelector('#ingredient-search-button');
+if (ingredientSearchButton) {
+  ingredientSearchButton.addEventListener('click', findRecipeByIngredient);
+}
+
+function findRecipeByIngredient() {
+  const ingredientForSearchInput = document.querySelector('#ingredient-for-search').value.trim().toLowerCase();
+  const filteredRecipes = recipes.filter((recipe) =>
+    recipe.ingredients.some((ingredient) =>
+      ingredient.name.toLowerCase().includes(ingredientForSearchInput)
+    )
+  );
+  renderRecipes(filteredRecipes);
+}
 
