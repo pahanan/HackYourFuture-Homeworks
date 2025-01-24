@@ -40,6 +40,29 @@
     </div>
     
     <div id="recipes-container"></div>
+    
+    <div id="modal" class="modal hidden">
+        <div class="modal-content">
+          <button id="close-modal" class="close-button">&times;</button>
+          <h2>Add a new recipe</h2>
+          <form id="recipe-form">
+            <label for="recipe-title">Name of the recipe:</label>
+            <input type="text" id="recipe-title" placeholder="Enter the name" required />
+      
+            <label for="recipe-image">Image:</label>
+            <input type="text" id="recipe-image" placeholder="Enter the image URL" required />
+      
+            <label for="recipe-description">Description:</label>
+            <textarea id="recipe-description" placeholder="Enter the description" required></textarea>
+      
+            <div id="ingredients-container"></div>
+            <button id="add-ingredient-button" type="button">Add ingredient</button>
+      
+            <button type="submit" id="submit-recipe">Save</button>
+          </form>
+        </div>
+      </div>
+      
 
     <script src="script.js"></script>
 </body>
