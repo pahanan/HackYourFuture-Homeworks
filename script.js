@@ -1,5 +1,5 @@
-const API_URL = 'https://raw.githubusercontent.com/pahanan/pahan_an.github.io/main/api/data.json';
-const INGREDIENTS_API_URL = 'https://raw.githubusercontent.com/pahanan/pahan_an.github.io/main/api/ingredient-prices.json';
+const API_URL = 'https://raw.githubusercontent.com/pahanan/pahan_an.github.io/refs/heads/main/api/data.json';
+const INGREDIENTS_API_URL = 'https://raw.githubusercontent.com/pahanan/pahan_an.github.io/refs/heads/main/api/ingredient-prices.json';
 let recipes = [];
 let ingredientPrices = {};
 
@@ -167,9 +167,10 @@ function renderRecipes(recipesToRender = recipes) {
   recipesContainer.innerHTML = '';
 
   if (recipesToRender.length === 0) {
-    recipesContainer.innerHTML = '<p>Recipes not found.</p>';
+    recipesContainer.innerHTML += '<p>Recipes not found.</p>';
     return;
   }
+
 
   recipesToRender.forEach((recipe) => {
     const recipeDiv = document.createElement('div');
@@ -192,7 +193,12 @@ function renderRecipes(recipesToRender = recipes) {
     const ingredientsList = document.createElement('ul');
     recipe.ingredients.forEach((ingredient) => {
       const ingredientItem = document.createElement('li');
-      ingredientItem.textContent = `${ingredient.name}: ${ingredient.amount} (${ingredient.price} DKK)`;
+      // Check if the ingredient has a price
+      if (ingredient.price && ingredient.price !== 'N/A') {
+        ingredientItem.innerHTML = `${ingredient.name}: ${ingredient.amount} (<span class="price-highlight">${ingredient.price} DKK</span>)`;
+      } else {
+        ingredientItem.textContent = `${ingredient.name}: ${ingredient.amount}`;
+      }
       ingredientsList.appendChild(ingredientItem);
     });
     recipeDiv.appendChild(ingredientsList);
@@ -210,7 +216,6 @@ searchInput.addEventListener('keydown', (event) => {
 
 findRecipeByWord();
 function findRecipeByWord() {
-  
   searchButton.addEventListener('click', findRecipeByWord);
 
   const wordForSearchInput = searchInput.value.trim().toLowerCase();
@@ -357,3 +362,4 @@ function startCustomTimer() {
 document.querySelector('#start-timer').addEventListener('click', startCustomTimer);
 
 fetchRecipes();
+

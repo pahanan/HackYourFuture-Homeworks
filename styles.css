@@ -205,3 +205,9 @@ textarea {
     height: auto;
   }
 }
+
+.price-highlight {
+  color: #007bff; /* Цвет кнопок меню */
+  font-weight: bold;
+}
+
