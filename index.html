@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="functions-form">
+        <div id="search-form">
+            <input type="text" id="word-for-search" placeholder="Search for a recipe" />
+            <button id="search-button">Search</button>
+        </div>
+
+        <div id="ingredient-search-form">
+            <input type="text" id="ingredient-for-search" placeholder="Search by ingredient" />
+            <button id="ingredient-search-button">Search Ingredient</button>
+        </div>
+    
+        <div id="sort-form">
+            <button id="sort-button">Sort by the amount of ingredients needed</button>
+        </div>
+
+        <button id="add-new-recipe">Add new recipe</button>
+
+        <div id="custom-timer-form">
+            <label for="timer-input">Set Timer:</label>
+            <input type="text" id="timer-input" placeholder="Enter minutes" />
+            <button id="start-timer">Start Timer</button>
+            <div id="timer-display">00:00:00</div>
+            <audio id="alarm-sound" src="./timer.mp3"></audio>
+            <audio id="finish-sound" src="./notification.mp3"></audio>
+        </div>
+        
+        <div id="page-timer-form">
+            <label>Time on page:</label>
+            <span id="page-timer">00:00:00</span>
+        </div>
+    </div>
+
+    <div id="recipes-container"></div>
+    
+    <div id="modal" class="modal hidden">
+        <div class="modal-content">
+          <button id="close-modal" class="close-button">&times;</button>
+          <h2>Add a new recipe</h2>
+          <form id="recipe-form">
+            <label for="recipe-title">Name of the recipe:</label>
+            <input type="text" id="recipe-title" placeholder="Enter the name" required />
+      
+            <label for="recipe-image">Image:</label>
+            <input type="text" id="recipe-image" placeholder="Enter the image URL" required />
+      
+            <label for="recipe-description">Description:</label>
+            <textarea id="recipe-description" placeholder="Enter the description" required></textarea>
+      
+            <div id="ingredients-container"></div>
+            <button id="add-ingredient-button" type="button">Add ingredient</button>
+      
+            <button type="submit" id="submit-recipe">Save</button>
+          </form>
+        </div>
+      </div>
+      
+
+    <script src="script.js"></script>
+</body>
+</html>
