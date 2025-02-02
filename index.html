@@ -5,9 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recipe</title>
     <link rel="stylesheet" href="styles.css">
+    <link id="dark-theme" rel="stylesheet" href="dark-theme.css" disabled>
 </head>
 <body>
     <div id="functions-form">
+        <button id="theme-toggle">🌙 Dark Mode</button>
+        
         <div id="search-form">
             <input type="text" id="word-for-search" placeholder="Search for a recipe" />
             <button id="search-button">Search</button>
@@ -21,6 +24,10 @@
         <div id="sort-form">
             <button id="sort-button">Sort by the amount of ingredients needed</button>
         </div>
+
+        <button id="sort-by-price">Sort by Price</button>
+
+        <button id="random-recipe">🎲 Feeling Lucky</button>
 
         <button id="add-new-recipe">Add new recipe</button>
 
@@ -38,6 +45,8 @@
             <span id="page-timer">00:00:00</span>
         </div>
     </div>
+
+    <div id="search-description" class="hidden"></div>
 
     <div id="recipes-container"></div>
     

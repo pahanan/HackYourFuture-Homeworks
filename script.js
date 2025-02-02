@@ -13,7 +13,55 @@ const searchInput = document.querySelector('#word-for-search');
 const ingredientSearchInput = document.querySelector('#ingredient-for-search');
 const searchButton = document.querySelector('#search-button');
 const searchingredientButton = document.querySelector('#ingredient-search-button');
+const searchDescription = document.querySelector("#search-description");
 
+document.querySelector('#start-timer').addEventListener('click', startCustomTimer);
+searchInput.addEventListener('input', findRecipeByWord);
+ingredientSearchInput.addEventListener('input', findRecipeByIngredient);
+
+const themeToggle = document.querySelector("#theme-toggle");
+const darkThemeStylesheet = document.querySelector("#dark-theme"); 
+
+function toggleDarkMode() {
+  if (document.body.classList.contains("dark-mode")) {
+    document.body.classList.remove("dark-mode");
+    localStorage.setItem("dark-mode", "disabled");
+    themeToggle.textContent = "🌙 Dark Mode";
+    removeDarkThemeStyles();
+  } else {
+    document.body.classList.add("dark-mode");
+    localStorage.setItem("dark-mode", "enabled");
+    themeToggle.textContent = "☀️ Light Mode";
+    addDarkThemeStyles();
+  }
+}
+
+function addDarkThemeStyles() {
+  let darkThemeLink = document.createElement("link");
+  darkThemeLink.rel = "stylesheet";
+  darkThemeLink.href = "dark-theme.css";
+  darkThemeLink.id = "dark-theme"; 
+  document.head.appendChild(darkThemeLink);
+}
+
+function removeDarkThemeStyles() {
+  let darkThemeLink = document.querySelector("#dark-theme");
+  if (darkThemeLink) {
+    darkThemeLink.remove();
+  }
+}
+
+if (localStorage.getItem("dark-mode") === "enabled") {
+  document.body.classList.add("dark-mode");
+  themeToggle.textContent = "☀️ Light Mode";
+  addDarkThemeStyles();
+} else {
+  document.body.classList.remove("dark-mode");
+  themeToggle.textContent = "🌙 Dark Mode";
+  removeDarkThemeStyles();
+}
+
+themeToggle.addEventListener("click", toggleDarkMode);
 
 async function fetchRecipes() {
   try {
@@ -167,7 +215,7 @@ function renderRecipes(recipesToRender = recipes) {
   recipesContainer.innerHTML = '';
 
   if (recipesToRender.length === 0) {
-    recipesContainer.innerHTML += '<p>Recipes not found.</p>';
+    recipesContainer.innerHTML = '<p class="no-recipes">Recipes not found</p>';
     return;
   }
 
@@ -216,14 +264,19 @@ searchInput.addEventListener('keydown', (event) => {
 
 findRecipeByWord();
 function findRecipeByWord() {
-  searchButton.addEventListener('click', findRecipeByWord);
-
   const wordForSearchInput = searchInput.value.trim().toLowerCase();
+  if (wordForSearchInput) {
+    searchDescription.innerHTML = `🔍 Searching for recipes containing: <strong>${wordForSearchInput}</strong>`;
+    searchDescription.classList.remove("hidden");
+  } else {
+    searchDescription.classList.add("hidden");
+  }
+
   const filteredRecipes = recipes.filter((recipe) =>
     recipe.title.toLowerCase().includes(wordForSearchInput)
   );
-  
-  ingredientSearchInput.value = '';
+
+  ingredientSearchInput.value = ''; 
   renderRecipes(filteredRecipes);
 }
 
@@ -236,15 +289,21 @@ ingredientSearchInput.addEventListener('keydown', (event) => {
 
 findRecipeByIngredient();
 function findRecipeByIngredient() {
-  searchingredientButton.addEventListener(`click`, findRecipeByIngredient);
-
   const ingredientForSearchInput = ingredientSearchInput.value.trim().toLowerCase();
+  if (ingredientForSearchInput) {
+    searchDescription.innerHTML = `🧑‍🍳 Searching for recipes with ingredient: <strong>${ingredientForSearchInput}</strong>`;
+    searchDescription.classList.remove("hidden");
+  } else {
+    searchDescription.classList.add("hidden");
+  }
+
   const filteredRecipes = recipes.filter((recipe) =>
     recipe.ingredients.some((ingredient) =>
       ingredient.name.toLowerCase().includes(ingredientForSearchInput)
     )
   );
-  searchInput.value = '';
+
+  searchInput.value = ''; 
   renderRecipes(filteredRecipes);
 }
 
@@ -359,7 +418,29 @@ function startCustomTimer() {
   updateDisplay();
 }
 
-document.querySelector('#start-timer').addEventListener('click', startCustomTimer);
-
 fetchRecipes();
+
+const sortByPriceBtn = document.querySelector("#sort-by-price");
+let sortPriceDescending = false;
+
+sortByPriceBtn.addEventListener("click", () => {
+  recipes.sort((a, b) => {
+    const priceA = a.ingredients.reduce((sum, ing) => sum + (parseFloat(ing.price) || 0), 0);
+    const priceB = b.ingredients.reduce((sum, ing) => sum + (parseFloat(ing.price) || 0), 0);
+    return sortPriceDescending ? priceB - priceA : priceA - priceB;
+  });
+
+  sortPriceDescending = !sortPriceDescending;
+  renderRecipes(recipes);
+});
+
+const randomRecipeButton = document.querySelector("#random-recipe");
+
+randomRecipeButton.addEventListener("click", () => {
+  if (recipes.length === 0) return;
+  
+  const randomIndex = Math.floor(Math.random() * recipes.length);
+  renderRecipes([recipes[randomIndex]]);
+});
+
 
